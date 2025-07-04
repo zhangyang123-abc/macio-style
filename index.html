@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>专属装修风格测试</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f7f9fc;
+            color: #333;
+            line-height: 1.6;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+        .container {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            max-width: 100%;
+        }
+        .header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            text-align: center;
+            padding: 22px 15px 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+            margin: 8px 0 0;
+            font-weight: 300;
+        }
+        .progress-container {
+            background: #e0e6ef;
+            position: sticky;
+            top: 0;
+            z-index: 9;
+        }
+        .progress-bar {
+            height: 6px;
+        }
+        .progress {
+            height: 100%;
+            background: #ff6b6b;
+            width: 0%;
+            transition: width 0.4s ease;
+            border-radius: 0 3px 3px 0;
+        }
+        .content {
+            padding: 20px 15px;
+            flex: 1;
+        }
+        .question-container {
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 180px);
+        }
+        .question {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2d3748;
+            line-height: 1.4;
+        }
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: auto;
+            margin-bottom: 30px;
+        }
+        .option {
+            padding: 16px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .option:hover {
+            background: #edf2f7;
+            transform: translateY(-2px);
+        }
+        .option.selected {
+            background: #ebf8ff;
+            border-color: #4299e1;
+            box-shadow: 0 4px 10px rgba(66, 153, 225, 0.2);
+        }
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding-top: 10px;
+            margin-top: auto;
+        }
+        button {
+            padding: 14px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            flex: 1;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .prev-btn {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        .next-btn {
+            background: #4299e1;
+            color: white;
+        }
+        .submit-btn {
+            background: #48bb78;
+            color: white;
+        }
+        .result-container {
+            display: none;
+            padding: 15px;
+            animation: fadeIn 0.6s ease;
+        }
+        .style-title {
+            font-size: 32px;
+            color: #2d3748;
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: 700;
+        }
+        .style-subtitle {
+            font-size: 18px;
+            color: #718096;
+            margin-top: 0;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .style-description {
+            background: #f8f9fa;
+            border-left: 4px solid #4299e1;
+            padding: 16px;
+            text-align: left;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+        .style-features {
+            text-align: left;
+            margin-bottom: 25px;
+        }
+        .style-features h3 {
+            color: #2d3748;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+        li {
+            margin-bottom: 12px;
+        }
+        .color-palette {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin: 15px 0 20px;
+        }
+        .color-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .recommendations {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin: 15px 0 25px;
+        }
+        .recommendation-item {
+            width: calc(50% - 6px);
+            text-align: center;
+            padding: 12px 8px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            font-size: 14px;
+        }
+        .style-gallery {
+            margin: 35px 0 25px;
+            text-align: center;
+        }
+        .gallery-title {
+            font-size: 22px;
+            color: #2d3748;
+            margin-bottom: 18px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .gallery-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .gallery-item {
+            background: white;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+        .style-image {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+        }
+        .image-caption {
+            padding: 12px 15px;
+            font-size: 15px;
+            color: #4a5568;
+            text-align: center;
+        }
+        .restart-btn {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            margin: 20px auto 10px;
+            padding: 16px 25px;
+            display: block;
+            width: 80%;
+            max-width: 280px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(106, 17, 203, 0.25);
+        }
+        .restart-btn:active {
+            transform: scale(0.98);
+        }
+        
+        /* 移动端优化与动画 */
+        @media (max-width: 350px) {
+            .option {
+                padding: 14px 12px;
+                font-size: 14px;
+            }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (min-width: 768px) {
+            .container {
+                max-width: 500px;
+                margin: 20px auto;
+                min-height: 0;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+                border-radius: 18px;
+            }
+            .header {
+                border-radius: 18px 18px 0 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>专属装修风格测试</h1>
+            <p>回答10个问题，解锁最适合您的家居风格</p>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <!-- 问题页面 -->
+            <div class="question-container" id="question-container">
+                <div class="question" id="question"></div>
+                <div class="options" id="options"></div>
+                <div class="btn-container">
+                    <button class="prev-btn" id="prev-btn" onclick="prevQuestion()">上一题</button>
+                    <button class="next-btn" id="next-btn" onclick="nextQuestion()">下一题</button>
+                    <button class="submit-btn" id="submit-btn" onclick="showResult()">查看结果</button>
+                </div>
+            </div>
+            
+            <!-- 结果页面 -->
+            <div class="result-container" id="result-container">
+                <h2 class="style-title" id="style-title">您的专属装修风格</h2>
+                <p class="style-subtitle" id="style-subtitle"></p>
+                
+                <div class="style-description" id="style-description"></div>
+                
+                <div class="style-features">
+                    <h3>风格特点</h3>
+                    <ul id="style-features"></ul>
+                </div>
+                
+                <div>
+                    <h3>推荐配色</h3>
+                    <div class="color-palette" id="color-palette"></div>
+                </div>
+                
+                <div>
+                    <h3>推荐元素</h3>
+                    <div class="recommendations" id="recommendations"></div>
+                </div>
+                
+                <!-- 效果图展示区域 -->
+                <div class="style-gallery">
+                    <h3 class="gallery-title">效果图展示</h3>
+                    <p>以下效果图可以帮助您更直观地了解该风格的实际应用</p>
+                    <div class="gallery-container" id="gallery-container"></div>
+                </div>
+                
+                <button class="restart-btn" onclick="restartTest()">重新测试</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 装修风格数据库（包含效果图URL）
+        const styles = {
+            minimalist: {
+                name: "现代简约",
+                desc: "Less is more的哲学体现，强调功能性与空间流动性",
+                features: [
+                    "简洁流畅的线条与几何造型",
+                    "中性色调为主，点缀少量亮色",
+                    "隐藏式收纳与智能家居系统",
+                    "注重空间留白与通透感"
+                ],
+                colors: ["#FFFFFF", "#F5F5F5", "#E0E0E0", "#9E9E9E", "#212121"],
+                elements: ["隐藏式灯带", "岩板台面", "悬浮家具", "极简收纳系统"],
+                images: [
+                    {url: "https://images.unsplash.com/photo-1540518614846-7eded433c457?q=80", title: "开放式客厅"},
+                    {url: "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?q=80", title: "极简厨房设计"},
+                    {url: "https://images.unsplash.com/photo-1616486029423-aaaedffd67bc?q=80", title: "卧室通透布局"}
+                ]
+            },
+            nordic: {
+                name: "北欧风情",
+                desc: "自然与功能的完美平衡，打造温暖舒适的生活空间",
+                features: [
+                    "天然材料：原木、棉麻、藤编",
+                    "柔和色调搭配清新绿植",
+                    "多功能实用主义设计",
+                    "最大化自然光线利用"
+                ],
+                colors: ["#FFFFFF", "#F0F0F0", "#A8D8D6", "#F7C8AA", "#5F6D7E"],
+                elements: ["原木家具", "手工编织物", "北欧几何图案", "藤编吊灯"],
+                images: [
+                    {url: "https://images.unsplash.com/photo-1502652023201-12ec06f0c8b3?q=80", title: "温馨客厅"},
+                    {url: "https://images.unsplash.com/photo-1513694203232-719a2801c921?q=80", title: "自然光书房"},
+                    {url: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?q=80", title: "木材质感卧室"}
+                ]
+            },
+            oriental: {
+                name: "新中式",
+                desc: "融合东方美学与现代生活的诗意栖居",
+                features: [
+                    "对称平衡的空间布局",
+                    "传统与现代材料的碰撞",
+                    "写意山水元素的抽象化运用",
+                    "留白艺术与光影营造禅意"
+                ],
+                colors: ["#F5F1E6", "#D9C7A0", "#8E7D5B", "#5D3A2E", "#2A1A12"],
+                elements: ["月洞门", "实木格栅", "宣纸灯", "枯山水微景观"],
+                images: [
+                    {url: "https://images.unsplash.com/photo-1548126032-079a0fb0099d?q=80", title: "禅意茶室"},
+                    {url: "https://images.unsplash.com/photo-1616047006789-b4af4724dd55?q=80", title: "雅致餐厅"},
+                    {url: "https://images.unsplash.com/photo-1615876234886-fd9a39fda97f?q=80", title: "书房屏风设计"}
+                ]
+            },
+            industrial: {
+                name: "工业风",
+                desc: "粗犷与精致的矛盾美学，展现原始结构的独特魅力",
+                features: [
+                    "裸露的建筑结构元素",
+                    "金属、水泥与旧木材质的混搭",
+                    "复古机械感装饰元素",
+                    "低饱和度色调配合局部亮色"
+                ],
+                colors: ["#2D2D2D", "#4A4A4A", "#C4BBAF", "#A6583C", "#D9C5A1"],
+                elements: ["裸露管线", "金属货架", "爱迪生灯泡", "做旧皮质沙发"],
+                images: [
+                    {url: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?q=80", title: "LOFT风格客厅"},
+                    {url: "https://images.unsplash.com/photo-1512917774080-9b5a85b4c3aa?q=80", title: "工业风厨房"},
+                    {url: "https://images.unsplash.com/photo-1556912167-f556f1f39f77?q=80", title: "复古卧室空间"}
+                ]
+            },
+            cottagecore: {
+                name: "田园牧歌",
+                desc: "童话般的温暖氛围，营造逃离都市的治愈空间",
+                features: [
+                    "柔和的奶油色系与花卉元素",
+                    "拱形门洞与曲线造型",
+                    "复古手工感装饰品",
+                    "自然材料的手作质感"
+                ],
+                colors: ["#FAF3E0", "#EED9C4", "#C5B29A", "#A8C3AF", "#E9A1A1"],
+                elements: ["法式双开门", "藤蔓壁纸", "碎花布艺", "陶瓷把手"],
+                images: [
+                    {url: "https://images.unsplash.com/photo-1540518614846-7eded433c457?q=80", title: "花园式厨房"},
+                    {url: "https://images.unsplash.com/photo-1593696140826-c58b068bdeed?q=80", title: "乡村风客厅"},
+                    {url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80", title: "温馨卧室角落"}
+                ]
+            }
+        };
+
+        // 测试题目
+        const questions = [
+            {
+                text: "您的房屋主要用途是？",
+                options: [
+                    {text: "独居空间", scores: {minimalist: 2, industrial: 1}},
+                    {text: "家庭生活", scores: {nordic: 2, cottagecore: 1}},
+                    {text: "社交聚会", scores: {industrial: 2, minimalist: 1}},
+                    {text: "度假休憩", scores: {oriental: 2, cottagecore: 1}}
+                ]
+            },
+            {
+                text: "您每天在家的时间段？",
+                options: [
+                    {text: "白天（自然光充足）", scores: {nordic: 2, oriental: 1}},
+                    {text: "夜晚（灯光使用多）", scores: {industrial: 2, minimalist: 1}},
+                    {text: "全天各时段平衡", scores: {cottagecore: 2, oriental: 1}}
+                ]
+            },
+            {
+                text: "您最重视空间的哪个功能？",
+                options: [
+                    {text: "高效工作/学习区", scores: {minimalist: 3}},
+                    {text: "舒适放松的休息区", scores: {cottagecore: 3}},
+                    {text: "社交娱乐空间", scores: {industrial: 2, minimalist: 1}},
+                    {text: "文化展示与收藏", scores: {oriental: 2, nordic: 1}}
+                ]
+            },
+            {
+                text: "哪种材质组合最吸引您？",
+                options: [
+                    {text: "玻璃+金属+大理石", scores: {minimalist: 3}},
+                    {text: "原木+棉麻+绿植", scores: {nordic: 3}},
+                    {text: "青砖+实木+宣纸", scores: {oriental: 3}},
+                    {text: "水泥+锈铁+皮革", scores: {industrial: 3}},
+                    {text: "藤编+陶土+碎花布", scores: {cottagecore: 3}}
+                ]
+            },
+            {
+                text: "您更倾向哪种色彩方案？",
+                options: [
+                    {text: "黑白灰+单色点缀", scores: {minimalist: 2, industrial: 1}},
+                    {text: "米白+原木色+薄荷绿", scores: {nordic: 3}},
+                    {text: "大地色系+中国红", scores: {oriental: 3}},
+                    {text: "砖红+皮椅棕+金属色", scores: {industrial: 2}},
+                    {text: "奶油白+陶土粉+橄榄绿", scores: {cottagecore: 3}}
+                ]
+            },
+            {
+                text: "您对收纳的需求是？",
+                options: [
+                    {text: "极致隐形收纳", scores: {minimalist: 3}},
+                    {text: "美观展示型收纳", scores: {industrial: 2, nordic: 1}},
+                    {text: "传统柜体收纳", scores: {oriental: 2}},
+                    {text: "开放式+装饰性收纳", scores: {cottagecore: 2, nordic: 1}}
+                ]
+            },
+            {
+                text: "您希望空间传递什么氛围？",
+                options: [
+                    {text: "高效与科技感", scores: {minimalist: 3}},
+                    {text: "自然与温暖", scores: {nordic: 2, cottagecore: 1}},
+                    {text: "禅意与宁静", scores: {oriental: 3}},
+                    {text: "个性与力量感", scores: {industrial: 3}}
+                ]
+            },
+            {
+                text: "下列哪个场景最让您向往？",
+                options: [
+                    {text: "无边泳池旁的极简别墅", scores: {minimalist: 3}},
+                    {text: "森林中的原木小屋", scores: {nordic: 3}},
+                    {text: "围合庭院里的茶室", scores: {oriental: 3}},
+                    {text: "都市loft里的艺术工作室", scores: {industrial: 3}},
+                    {text: "开满玫瑰的乡间农舍", scores: {cottagecore: 3}}
+                ]
+            },
+            {
+                text: "您的家具选择倾向？",
+                options: [
+                    {text: "定制嵌入式家具", scores: {minimalist: 2}},
+                    {text: "北欧设计品牌", scores: {nordic: 2}},
+                    {text: "明式改良家具", scores: {oriental: 2}},
+                    {text: "复古工业风家具", scores: {industrial: 2}},
+                    {text: "法式乡村风", scores: {cottagecore: 2}}
+                ]
+            },
+            {
+                text: "灯光设计偏好？",
+                options: [
+                    {text: "无主灯+智能调光", scores: {minimalist: 3}},
+                    {text: "温馨点光源+自然采光", scores: {nordic: 2, cottagecore: 1}},
+                    {text: "灯笼式传统灯具", scores: {oriental: 3}},
+                    {text: "裸露灯泡+轨道射灯", scores: {industrial: 3}}
+                ]
+            }
+        ];
+
+        // 全局变量
+        let currentQuestion = 0;
+        let userSelections = [];
+        let scoreBoard = {
+            minimalist: 0,
+            nordic: 0,
+            oriental: 0,
+            industrial: 0,
+            cottagecore: 0
+        };
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            showQuestion();
+            updateProgress();
+            document.getElementById('submit-btn').style.display = 'none';
+            document.getElementById('prev-btn').disabled = true;
+            
+            // 确保滚动到顶部
+            window.scrollTo(0, 0);
+        });
+
+        // 显示题目
+        function showQuestion() {
+            const questionElem = document.getElementById('question');
+            const optionsElem = document.getElementById('options');
+            const nextBtn = document.getElementById('next-btn');
+            const prevBtn = document.getElementById('prev-btn');
+            const submitBtn = document.getElementById('submit-btn');
+            
+            questionElem.textContent = `${currentQuestion+1}. ${questions[currentQuestion].text}`;
+            optionsElem.innerHTML = '';
+            
+            questions[currentQuestion].options.forEach((option, i) => {
+                const optionElem = document.createElement('div');
+                optionElem.className = 'option';
+                if (userSelections[currentQuestion] === i) {
+                    optionElem.classList.add('selected');
+                }
+                optionElem.innerHTML = `
+                    <span>${option.text}</span>
+                `;
+                optionElem.addEventListener('click', () => selectOption(i));
+                optionsElem.appendChild(optionElem);
+            });
+            
+            // 更新按钮状态
+            nextBtn.style.display = currentQuestion < questions.length - 1 ? 'flex' : 'none';
+            submitBtn.style.display = currentQuestion === questions.length - 1 ? 'flex' : 'none';
+            prevBtn.disabled = currentQuestion === 0;
+            
+            // 移动端自动滚动到视图
+            if(optionsElem.children.length > 0) {
+                optionsElem.children[0].scrollIntoView({behavior: 'smooth', block: 'nearest'});
+            }
+        }
+
+        // 选择选项
+        function selectOption(optionIndex) {
+            userSelections[currentQuestion] = optionIndex;
+            showQuestion();
+            
+            // 自动跳转下一题
+            setTimeout(() => {
+                if(currentQuestion < questions.length - 1) {
+                    nextQuestion();
+                }
+            }, 300);
+        }
+
+        // 下一题
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1 && userSelections[currentQuestion] !== undefined) {
+                currentQuestion++;
+                showQuestion();
+                updateProgress();
+                window.scrollTo(0, 0);
+            }
+        }
+
+        // 上一题
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion();
+                updateProgress();
+                window.scrollTo(0, 0);
+            }
+        }
+
+        // 更新进度条
+        function updateProgress() {
+            const progress = (currentQuestion + 1) / questions.length * 100;
+            document.getElementById('progress').style.width = progress + '%';
+        }
+
+        // 显示结果
+        function showResult() {
+            // 检查是否所有问题都已回答
+            if (userSelections.length !== questions.length) {
+                alert('请完成所有问题');
+                return;
+            }
+            
+            // 计算得分
+            calculateScores();
+            
+            // 找到最高分风格
+            const highestScore = Math.max(...Object.values(scoreBoard));
+            const resultStyle = Object.keys(scoreBoard).find(key => scoreBoard[key] === highestScore);
+            
+            // 显示结果页面
+            document.getElementById('question-container').style.display = 'none';
+            document.getElementById('result-container').style.display = 'block';
+            window.scrollTo(0, 0);
+            
+            // 更新结果页面内容
+            displayResult(styles[resultStyle]);
+        }
+
+        // 计算得分
+        function calculateScores() {
+            userSelections.forEach((selection, qIndex) => {
+                const selectedOption = questions[qIndex].options[selection];
+                Object.keys(selectedOption.scores).forEach(style => {
+                    scoreBoard[style] += selectedOption.scores[style];
+                });
+            });
+        }
+
+        // 显示结果详情
+        function displayResult(style) {
+            document.getElementById('style-title').textContent = style.name;
+            document.getElementById('style-subtitle').textContent = style.desc;
+            document.getElementById('style-description').textContent = `您的居住需求和审美偏好最匹配${style.name}风格，该风格注重空间情感表达与生活美学的平衡，将现代功能需求与独特的设计语言完美融合。`;
+            
+            // 设置风格特点
+            const featuresList = document.getElementById('style-features');
+            featuresList.innerHTML = '';
+            style.features.forEach(feature => {
+                const li = document.createElement('li');
+                li.textContent = feature;
+                featuresList.appendChild(li);
+            });
+            
+            // 设置配色方案
+            const colorPalette = document.getElementById('color-palette');
+            colorPalette.innerHTML = '';
+            style.colors.forEach(color => {
+                const colorBox = document.createElement('div');
+                colorBox.className = 'color-box';
+                colorBox.style.backgroundColor = color;
+                colorBox.setAttribute('title', color);
+                colorPalette.appendChild(colorBox);
+            });
+            
+            // 设置推荐元素
+            const recContainer = document.getElementById('recommendations');
+            recContainer.innerHTML = '';
+            style.elements.forEach(element => {
+                const item = document.createElement('div');
+                item.className = 'recommendation-item';
+                item.textContent = element;
+                recContainer.appendChild(item);
+            });
+            
+            // 设置效果图展示
+            const galleryContainer = document.getElementById('gallery-container');
+            galleryContainer.innerHTML = '';
+            style.images.forEach(img => {
+                const galleryItem = document.createElement('div');
+                galleryItem.className = 'gallery-item';
+                
+                const imgElement = document.createElement('img');
+                imgElement.src = img.url;
+                imgElement.alt = img.title;
+                imgElement.className = 'style-image';
+                
+                const caption = document.createElement('div');
+                caption.className = 'image-caption';
+                caption.textContent = img.title;
+                
+                galleryItem.appendChild(imgElement);
+                galleryItem.appendChild(caption);
+                galleryContainer.appendChild(galleryItem);
+            });
+        }
+
+        // 重新开始测试
+        function restartTest() {
+            currentQuestion = 0;
+            userSelections = [];
+            scoreBoard = {
+                minimalist: 0,
+                nordic: 0,
+                oriental: 0,
+                industrial: 0,
+                cottagecore: 0
+            };
+            
+            document.getElementById('result-container').style.display = 'none';
+            document.getElementById('question-container').style.display = 'block';
+            showQuestion();
+            updateProgress();
+            document.getElementById('prev-btn').disabled = true;
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>
